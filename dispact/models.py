@@ -3,8 +3,15 @@ from django.db import models
 class Activity(models.Model):
     sport = models.CharField(max_length=30)
     date = models.DateTimeField('date')
-    duration = models.DurationField('elapsed time')
+    end = models.DurationField('elapsed time')
     distance = models.FloatField('distance')
+
+    class Meta:
+        ordering = (created,)
+
+    @property
+    def duration(self):
+        return self.end - self.date
 
 class TrkPt(models.Model):
     act = models.ForeignKey(Activity, on_delete=models.CASCADE)
