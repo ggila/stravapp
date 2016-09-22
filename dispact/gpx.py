@@ -2,14 +2,12 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from datetime import datetime
 
-strava_id = ['StravaGPX', 'strava.com Android']
-
 class gpx(object):
     '''
-        gpx file interface
+        gpx interface
 
         gpx is an XML schema designed as a common GPS data format for software applications.
-        This class has read() and write() methods for reading and writing gpx file.
+        This class has read() and write() methods for reading and writing xml string.
 
 
         from gps 1.1 doc:
@@ -55,20 +53,13 @@ class gpx(object):
             </trkseg>
     '''
 
-    _xml_namespace = '{http://www.topografix.com/GPX/1/1}'
-
-    class garmin(object):
-        time_format = '%Y-%m-%dT%H:%M:%S.000Z'
-
-    class strava(object):
-        time_format = '%Y-%m-%dT%H:%M:%SZ'
-
     def __repr__(self):
         pass
 
     @staticmethod
-    def read(gpx_file):
-        '''return a dict describing activities'''
+    def read(gpx):
+        '''
+            return a dict describing activities'''
         # parse xml file
         it = ET.iterparse(gpx_file)
         for _, el in it:
