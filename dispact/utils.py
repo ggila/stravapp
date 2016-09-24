@@ -1,6 +1,6 @@
 import xmltodict
 
-def get_activity(gpx):
+def get_activity_json(gpx):
     ''' 
 
         open activity from gpx file
