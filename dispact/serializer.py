@@ -4,7 +4,8 @@ class ActivitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Activity
-        fields = ('sport',
+        fields = ('name',
+                  'sport',
                   'date',
                   'end',
                   'distance',)

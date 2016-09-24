@@ -2,6 +2,9 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from datetime import datetime
 
+TIME_FORMAT = {'Garmin Connect' : '%Y-%m-%dT%H:%M:%S.000Z',
+               'Strava.com Android' : '%Y-%m-%dT%H:%M:%SZ'}
+
 class gpx(object):
     '''
         gpx interface
@@ -10,7 +13,7 @@ class gpx(object):
         This class has read() and write() methods for reading and writing xml string.
 
 
-        from gps 1.1 doc:
+        from gpx doc:
             <gpx
             version="1.1 [1]"
             creator="xsd:string [1]"> 
@@ -20,7 +23,8 @@ class gpx(object):
                 <trk> trkType </trk> [0..*] 
                 <extensions> extensionsType </extensions> [0..1] 
             </gpx>
-        from gps 1.1 doc:
+
+        from gpx doc:
             <metadata> 
                 <name> xsd:string </name> [0..1] 
                 <desc> xsd:string </desc> [0..1] 
@@ -33,7 +37,7 @@ class gpx(object):
                 <extensions> extensionsType </extensions> [0..1] 
             </metadata>
 
-        from gps 1.1 doc:
+        from gpx doc:
             <trk> 
                 <name> xsd:string </name> [0..1] 
                 <cmt> xsd:string </cmt> [0..1] 
@@ -46,7 +50,7 @@ class gpx(object):
                 <trkseg> trksegType </trkseg> [0..*] 
             </trk>
 
-        from gps 1.1 doc:
+        from gpx doc:
             <trkseg> 
                 <trkpt> wptType </trkpt> [0..*] 
                 <extensions> extensionsType </extensions> [0..1] 
@@ -57,38 +61,11 @@ class gpx(object):
         pass
 
     @staticmethod
+    def basic_parse(gpx):
+        if ...:
+            raise Exception('bad format #1')
+        
+
+    @staticmethod
     def read(gpx):
-        pass
-
-    @staticmethod
-    def _readTime(meta, time_format):
-        '''
-        Return datetime from metadata xml element
-        '''
-        time = meta.find('time'.format(gpx._xml_namespace)).text
-        return datetime.strptime(time, time_format)
-
-    @staticmethod
-    def _readDeltaTime(time, t0, time_format):
-        return datetime.strptime(time, time_format) - t0
-
-    @staticmethod
-    def _addAttr(ptDict, pTag, attr, func):
-            tag = pTag.find(attr)
-            if tag is not None:
-                ptDict[attr] = func(tag.text)
-
-    @staticmethod
-    def _readTrkPt(pt, t0, tf):
-        '''setup track points list from trkseg xml element'''
-        ptDict = {k: float(v) for k, v in pt.attrib.items()}  # get lon and lat
-        for attr, func in (('ele', float),
-                           ('time', lambda t: gpx._readDeltaTime(t, t0, tf)),):
-            gpx._addAttr(ptDict, pt, attr, func)
-        extensions = pt.find('extensions')
-        if extensions is not None:
-            for attr, func in (('hr', int),
-                               ('cad', int),
-                               ('atemp', int),):
-                gpx._addAttr(ptDict, extensions[0], attr, func)
-        return ptDict
+        gpx.basic_parse(gpx)

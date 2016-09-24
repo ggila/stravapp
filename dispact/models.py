@@ -1,9 +1,10 @@
 from django.db import models
 
 class Activity(models.Model):
+    name = models(CharField(max_length=200))
     sport = models.CharField(max_length=30)
     date = models.DateTimeField('date')
-    end = models.DurationField('elapsed time')
+    end = models.DurationField('end')
     distance = models.FloatField('distance')
 
     class Meta:
