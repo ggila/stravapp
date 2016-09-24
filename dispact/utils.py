@@ -29,7 +29,10 @@ def get_activity(gpx):
      u'metadata',
      u'trk']
 
+     cf ./gpx.py for details
+
     '''
     with open(gpx, 'r') as f:
-        a = xmltodict.parse(f.read())
+        parsed_gpx = xmltodict.parse(f.read())
+        a = parsed_gpx['gpx']
     return a

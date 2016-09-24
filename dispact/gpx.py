@@ -58,32 +58,13 @@ class gpx(object):
 
     @staticmethod
     def read(gpx):
-        '''
-            return a dict describing activities'''
-        # parse xml file
-        it = ET.iterparse(gpx_file)
-        for _, el in it:
-            if '}' in el.tag: el.tag = el.tag.split('}', 1)[1]    # drop xml namespace
-        root = it.root
-        origin = gpx.strava() if root.attrib['creator'] in strava_id else gpx.garmin() # garmin and strava don't have the same format. gpx tag has an attrib creator which tell us file origin.
-
-        #unpack xml (for now, we consider only gpx with one track)
-        metadata, (trkName, trkPt) = list(root)
-        
-        #get info
-        time = gpx._readTime(metadata, origin.time_format)
-        trk_lst = []
-        for pt in trkPt:
-            trk_lst.append(gpx._readTrkPt(pt, time, origin.time_format))
-        
-        return {'origin': origin.__class__.__name__,
-                'name': trkName.text,
-                'time': time,
-                'track': trk_lst}
+        pass
 
     @staticmethod
     def _readTime(meta, time_format):
-        '''return datetime from metadata xml element'''
+        '''
+        Return datetime from metadata xml element
+        '''
         time = meta.find('time'.format(gpx._xml_namespace)).text
         return datetime.strptime(time, time_format)
 
