@@ -1,9 +1,11 @@
+import xmltodict
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from datetime import datetime
 
-TIME_FORMAT = {'Garmin Connect' : '%Y-%m-%dT%H:%M:%S.000Z',
-               'Strava.com Android' : '%Y-%m-%dT%H:%M:%SZ'}
+source = {'Garmin Connect' : {'time_format': '%Y-%m-%dT%H:%M:%S.000Z'},
+          'Strava.com Android' : {'time_format': '%Y-%m-%dT%H:%M:%SZ'}}
+
 
 class gpx(object):
     '''
@@ -60,12 +62,48 @@ class gpx(object):
     def __repr__(self):
         pass
 
+    class SourceCst(object):
+        '''
+        Depending on where the gpx file is coming / going, format differs.
+        An instance of this class should be used for each gpx.read() / gpx.write().
+        '''
+        def __init__(self, d):
+            for k, v in d.items():
+                setattr(self, k, v)
+
     @staticmethod
     def basic_parse(gpx):
-        if ...:
+        if :
             raise Exception('bad format #1')
         
 
     @staticmethod
     def read(gpx):
-        gpx.basic_parse(gpx)
+        ''' 
+        return json dict from gpx file
+    
+        in . gpx . path of gpx file
+                 . type . string
+        out . d . json dict
+                . type . collections.OrederdDict
+    
+    
+            >>> In [1]: a = get_activity('run.gpx')
+    
+            >>> In [2]: a.keys()
+                Out[2]:
+                [u'@version',
+                 u'@creator',
+                 u'@xsi:schemaLocation',
+                 u'@xmlns',
+                 u'@xmlns:gpxtpx',
+                 u'@xmlns:gpxx',
+                 u'@xmlns:xsi',
+                 u'metadata',
+                 u'trk']
+        '''
+        with open(gpx, 'r') as f:
+            parsed_gpx = xmltodict.parse(f.read())
+            gpx.basic_parse(gpx)
+            d = parsed_gpx['gpx']
+        return d
