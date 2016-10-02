@@ -73,14 +73,8 @@ class gpx(object):
             for k, v in d.items():
                 setattr(self, k, v)
 
-    @staticmethod
-    def basic_parse(gpx):
-        '''
-        '''
-        pass
-
-    @staticmethod
-    def read(gpx):
+    @classmethod
+    def read(cls, gpx):
         '''
         Check if gpx file contain a valid activity.
         If so, returns an ordereddict defining the activity.
@@ -107,6 +101,23 @@ class gpx(object):
         '''
         with open(gpx, 'r') as f:
             parsed_gpx = xmltodict.parse(f.read())
-            gpx.basic_parse(parsed_gpx)
-            d = parsed_gpx['gpx']
+        cls._basic_parse(parsed_gpx)
+        d = cls._set_activity_dict(parsed_gpx['gpx'])
         return d
+
+    @classmethod
+    def _basic_parse(cls, gpx_dict):
+        gpx = gpx_dict['gpx']
+        cls._check_creator(gpx['@creator'])
+
+    @staticmethod
+    def _check_creator(creator):
+        if creator not in source:
+            raise ValueError('xml file creator {} is not known'
+                             .format(creator))
+
+    @staticmehod
+    def _set_activity_dict(gpx):
+        creator = gpx['@creator']
+        source = SourceCst(creator)
+        d = {'name': gpx['trk']['name']} 
