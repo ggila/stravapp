@@ -3,11 +3,56 @@ import xmltodict
 #from xml.dom import minidom
 #from datetime import datetime
 
+'''
+    from gpx doc:
+        <gpx
+        version="1.1 [1]"
+        creator="xsd:string [1]">
+            <metadata> metadataType </metadata> [0..1]
+            <wpt> wptType </wpt> [0..*]
+            <rte> rteType </rte> [0..*]
+            <trk> trkType </trk> [0..*]
+            <extensions> extensionsType </extensions> [0..1]
+        </gpx>
+
+    from gpx doc:
+        <metadata>
+            <name> xsd:string </name> [0..1]
+            <desc> xsd:string </desc> [0..1]
+            <author> personType </author> [0..1]
+            <copyright> copyrightType </copyright> [0..1]
+            <link> linkType </link> [0..*]
+            <time> xsd:dateTime </time> [0..1]
+            <keywords> xsd:string </keywords> [0..1]
+            <bounds> boundsType </bounds> [0..1]
+            <extensions> extensionsType </extensions> [0..1]
+        </metadata>
+
+    from gpx doc:
+        <trk>
+            <name> xsd:string </name> [0..1]
+            <cmt> xsd:string </cmt> [0..1]
+            <desc> xsd:string </desc> [0..1]
+            <src> xsd:string </src> [0..1]
+            <link> linkType </link> [0..*]
+            <number> xsd:nonNegativeInteger </number> [0..1]
+            <type> xsd:string </type> [0..1]
+            <extensions> extensionsType </extensions> [0..1]
+            <trkseg> trksegType </trkseg> [0..*]
+        </trk>
+
+    from gpx doc:
+        <trkseg>
+            <trkpt> wptType </trkpt> [0..*]
+            <extensions> extensionsType </extensions> [0..1]
+        </trkseg>
+'''
+
 source = {'Garmin Connect': {'time_format': '%Y-%m-%dT%H:%M:%S.000Z'},
           'Strava.com Android': {'time_format': '%Y-%m-%dT%H:%M:%SZ'}}
 
 
-class gpx(object):
+class Gpx(object):
     '''
         gpx interface
 
@@ -15,50 +60,6 @@ class gpx(object):
         applications.
         This class has read() and write() methods for reading and writing xml
         string.
-
-
-        from gpx doc:
-            <gpx
-            version="1.1 [1]"
-            creator="xsd:string [1]">
-                <metadata> metadataType </metadata> [0..1]
-                <wpt> wptType </wpt> [0..*]
-                <rte> rteType </rte> [0..*]
-                <trk> trkType </trk> [0..*]
-                <extensions> extensionsType </extensions> [0..1]
-            </gpx>
-
-        from gpx doc:
-            <metadata>
-                <name> xsd:string </name> [0..1]
-                <desc> xsd:string </desc> [0..1]
-                <author> personType </author> [0..1]
-                <copyright> copyrightType </copyright> [0..1]
-                <link> linkType </link> [0..*]
-                <time> xsd:dateTime </time> [0..1]
-                <keywords> xsd:string </keywords> [0..1]
-                <bounds> boundsType </bounds> [0..1]
-                <extensions> extensionsType </extensions> [0..1]
-            </metadata>
-
-        from gpx doc:
-            <trk>
-                <name> xsd:string </name> [0..1]
-                <cmt> xsd:string </cmt> [0..1]
-                <desc> xsd:string </desc> [0..1]
-                <src> xsd:string </src> [0..1]
-                <link> linkType </link> [0..*]
-                <number> xsd:nonNegativeInteger </number> [0..1]
-                <type> xsd:string </type> [0..1]
-                <extensions> extensionsType </extensions> [0..1]
-                <trkseg> trksegType </trkseg> [0..*]
-            </trk>
-
-        from gpx doc:
-            <trkseg>
-                <trkpt> wptType </trkpt> [0..*]
-                <extensions> extensionsType </extensions> [0..1]
-            </trkseg>
     '''
 
     def __repr__(self):
@@ -76,28 +77,20 @@ class gpx(object):
     @classmethod
     def read(cls, gpx):
         '''
-        Check if gpx file contain a valid activity.
-        If so, returns an ordereddict defining the activity.
+        Check if gpx file contains a valid activity.
+        If so, returns a dict defining the activity.
 
-        in . gpx . path of gpx file
-                 . type . string
-        out . d . json dict
-                . type . collections.OrederdDict
+            >>> In [2]: a = Gpx.read('valid_run.gpx')
+            
+            >>> In [3]: a.keys()
+                Out[3]: ['date', 'tracks', 'name']
 
+            >>> In [4]: {k:type(a[k]) for k in a.keys()}
+                Out[4]: {'date': unicode, 'name': unicode, 'tracks': list}
+                
+            >>> In [5]: a['tracks'][0].keys()
+                Out[5]: ['lat', 'hr', 'ele', 'lon', 'delta']
 
-            >>> In [1]: a = gpx.read('run.gpx')
-
-            >>> In [2]: a.keys()
-                Out[2]:
-                [u'@version',
-                 u'@creator',
-                 u'@xsi:schemaLocation',
-                 u'@xmlns',
-                 u'@xmlns:gpxtpx',
-                 u'@xmlns:gpxx',
-                 u'@xmlns:xsi',
-                 u'metadata',
-                 u'trk']
         '''
         with open(gpx, 'r') as f:
             parsed_gpx = xmltodict.parse(f.read())
@@ -116,8 +109,32 @@ class gpx(object):
             raise ValueError('xml file creator {} is not known'
                              .format(creator))
 
-    @staticmehod
-    def _set_activity_dict(gpx):
-        creator = gpx['@creator']
-        source = SourceCst(creator)
-        d = {'name': gpx['trk']['name']} 
+    @classmethod
+    def _set_activity_dict(cls, gpx):
+        d = {
+            'name': gpx['trk']['name'],
+            'date': gpx['metadata']['time'],
+            'tracks': cls._format_tracks(
+                gpx['trk']['trkseg']['trkpt']),
+        } 
+        return d
+
+    @classmethod
+    def _format_tracks(cls, trkpt):
+        tracks = list()
+        for trk in trkpt:
+            track = {
+                    'delta': trk['time'], 
+                    'lon': trk['@lon'],
+                    'lat': trk['@lat'],
+                    'ele': trk['ele'],
+                    'hr': -1,
+            }
+            track.update(cls._check_extensions(trk))
+            tracks.append(track)
+        return tracks
+
+    @staticmethod
+    def _check_extensions(trk):
+        ext = dict()
+        return ext

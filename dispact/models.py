@@ -6,11 +6,17 @@ class Activity(models.Model):
     name = models.CharField(default='', max_length=200)
     sport = models.CharField(default='', max_length=30)
     date = models.DateTimeField(default=datetime.datetime.now())
-    end = models.DateTimeField(default=datetime.datetime.now())
-    distance = models.FloatField(default=0)
 
     class Meta:
         ordering = ('date',)
+
+    @property
+    def distance(self):
+        return 0.
+
+    @property
+    def end(self):
+        return self.date
 
     @property
     def duration(self):
@@ -18,10 +24,13 @@ class Activity(models.Model):
 
 admin.site.register(Activity)
 
-class TrkPt(models.Model):
+class Track(models.Model):
     act = models.ForeignKey(Activity, on_delete=models.CASCADE)
     delta = models.DurationField('elapsed time')
     lon = models.FloatField('longitude')
     lat = models.FloatField('latitude')
     ele = models.FloatField('elevation')
-    hr = models.PositiveSmallIntegerField('heart rate')   # might be not set
+    hr = models.SmallIntegerField('heart rate')   # might be not set
+
+    class Meta:
+        pass
